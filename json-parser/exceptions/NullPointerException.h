@@ -7,7 +7,7 @@
 
 #include <exception>
 #include <string>
-#include "../../JsonParserLib/tokens.h"
+#include "../../../JsonParserLib/tokens.h"
 
 class NullPointerException : public std::exception {
     std::string full_message;

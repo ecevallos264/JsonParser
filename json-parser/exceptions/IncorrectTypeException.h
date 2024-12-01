@@ -12,6 +12,7 @@
 #include <exception>
 #include <string>
 #include <format> // Requires C++20
+#include <sstream>
 
 class IncorrectTypeException : public std::exception {
     std::string full_message;
@@ -26,8 +27,9 @@ public:
 
 private:
     static std::string buildMessage(std::string targetType, std::string originType) {
-        return std::format("[Incorrect Data Type Exception] Cannot convert type {} to {}",
-                           originType, targetType);
+        std::stringstream ss;
+        ss << "[Incorrect Data Type Exception] Cannot convert type " << originType << " to " << targetType;
+        return ss.str();
     }
 };
 
