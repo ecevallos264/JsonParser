@@ -1,7 +1,7 @@
 #include <iostream>
 #include "../json-parser/parser.h"
 
-#define JSON_FILE "C:\\Users\\eceva\\CLionProjects\\JsonParse\\examples\\data.json"
+#define JSON_FILE "\\path\\to\\data.json"
 
 int main() {
     map object = Parser::getInstance().parse_file(JSON_FILE).toMap();
