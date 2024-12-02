@@ -12,6 +12,7 @@
 #include <optional>
 #include "exceptions/NullPointerException.h"
 #include "exceptions/IncorrectTypeException.h"
+#include "schema_handler.h"
 
 using map = std::unordered_map<std::string, class ParsedField>;
 using list = std::vector<class ParsedField>;
@@ -21,176 +22,185 @@ using null = std::monostate;
 
 class ParsedField {
 public:
+    using FieldValue = std::variant<
+            std::nullptr_t,
+            bool,
+            int,
+            float,
+            std::string,
+            std::vector<ParsedField>,
+            std::shared_ptr<Schema>
+    >;
 
 private:
-    std::variant<null, int, unsigned int, float, bool, string, list, map> value;
+    FieldValue value;
 
 public:
-    ParsedField() : value(null {}) {}
-    ParsedField(int v) : value(v) {}
-    ParsedField(unsigned int v) : value(v) {}
-    ParsedField(float v) : value(v) {}
-    ParsedField(string v) : value(v) {}
-    ParsedField(bool v) : value(v) {}
-    ParsedField(map v) : value(v) {}
-    ParsedField(list v) : value(v) {}
+    ParsedField() : value(nullptr) {}
+    ParsedField(bool b) : value(b) {}
+    ParsedField(int i) : value(i) {}
+    ParsedField(float f) : value(f) {}
+    ParsedField(const std::string& s) : value(s) {}
+    ParsedField(const char* s) : value(std::string(s)) {}
+    ParsedField(const std::vector<ParsedField>& v) : value(v) {}
+    ParsedField(std::shared_ptr<Schema> schema) : value(schema) {}
 
     template <typename T>
     T getValue() const {
         return std::get<T>(value);
     }
 
-    std::optional<string> toStringOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<string>(value)) {
-            throw IncorrectTypeException("string", type());
-        }
-        return std::get<string>(value);
-    }
-
-    std::optional<int> toIntOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<int>(value)) {
-            throw IncorrectTypeException("int", type());
-        }
-        return std::get<int>(value);
-    }
-
-    std::optional<unsigned int> toUIntOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<unsigned int>(value)) {
-            throw IncorrectTypeException("unsigned int", type());
-        }
-        return std::get<unsigned int>(value);
-    }
-
-    std::optional<float> toFloatOrNull() {
-        if (std::holds_alternative<int>(value)) {
-            return static_cast<float>(std::get<int>(value));
-        }
-        if (std::holds_alternative<unsigned int>(value)) {
-            return static_cast<float>(std::get<unsigned int>(value));
-        }
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<float>(value)) {
-            throw IncorrectTypeException("float", type());
-        }
-        return std::get<float>(value);
-    }
-
-    std::optional<bool> toBooleanOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<bool>(value)) {
-            throw IncorrectTypeException("bool", type());
-        }
-        return std::get<bool>(value);
-    }
-
-    std::optional<map> toMapOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<map>(value)) {
-            throw IncorrectTypeException("map", type());
-        }
-        return std::get<map>(value);
-    }
-    std::optional<list> toListOrNull() {
-        if (std::holds_alternative<std::monostate>(value)) {
-            return std::nullopt;
-        }
-        if (!std::holds_alternative<list>(value)) {
-            throw IncorrectTypeException("list", type());
-        }
-        return std::get<list>(value);
-    }
-
-    string toString() {
-        if (!std::holds_alternative<string>(value)) {
-            throw IncorrectTypeException("string", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<string>(value);
-    }
-
-    float toFloat() {
-        if (std::holds_alternative<int>(value)) {
-            return static_cast<float>(std::get<int>(value));
-        }
-        if (std::holds_alternative<unsigned int>(value)) {
-            return static_cast<float>(std::get<unsigned int>(value));
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<float>(value);
-    }
-
-    int toInt() {
-        if (!std::holds_alternative<int>(value)) {
-            throw IncorrectTypeException("int", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<int>(value);
-    }
-
-    unsigned int toUInt() {
-        if (!std::holds_alternative<unsigned int>(value)) {
-            throw IncorrectTypeException("unsigned int", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<unsigned int>(value);
-    }
-
-    bool toBoolean() {
-        if (!std::holds_alternative<bool>(value)) {
-            throw IncorrectTypeException("bool", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<bool>(value);
-    }
-
-    map toMap() {
-        if (!std::holds_alternative<map>(value)) {
-            throw IncorrectTypeException("map", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<map>(value);
-    }
-
-    list toList() {
-        if (!std::holds_alternative<list>(value)) {
-            throw IncorrectTypeException("array", type());
-        }
-        if (isNull()) {
-            throw NullPointerException("Value is Null");
-        }
-        return std::get<list>(value);
-    }
-
-    bool isNull() {
-        return std::holds_alternative<std::monostate>(value);
-    }
+//    std::optional<string> toStringOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<string>(value)) {
+//            throw IncorrectTypeException("string", type());
+//        }
+//        return std::get<string>(value);
+//    }
+//
+//    std::optional<int> toIntOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<int>(value)) {
+//            throw IncorrectTypeException("int", type());
+//        }
+//        return std::get<int>(value);
+//    }
+//
+//    std::optional<unsigned int> toUIntOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<unsigned int>(value)) {
+//            throw IncorrectTypeException("unsigned int", type());
+//        }
+//        return std::get<unsigned int>(value);
+//    }
+//
+//    std::optional<float> toFloatOrNull() {
+//        if (std::holds_alternative<int>(value)) {
+//            return static_cast<float>(std::get<int>(value));
+//        }
+//        if (std::holds_alternative<unsigned int>(value)) {
+//            return static_cast<float>(std::get<unsigned int>(value));
+//        }
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<float>(value)) {
+//            throw IncorrectTypeException("float", type());
+//        }
+//        return std::get<float>(value);
+//    }
+//
+//    std::optional<bool> toBooleanOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<bool>(value)) {
+//            throw IncorrectTypeException("bool", type());
+//        }
+//        return std::get<bool>(value);
+//    }
+//
+//    std::optional<map> toMapOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<map>(value)) {
+//            throw IncorrectTypeException("map", type());
+//        }
+//        return std::get<map>(value);
+//    }
+//    std::optional<list> toListOrNull() {
+//        if (std::holds_alternative<std::monostate>(value)) {
+//            return std::nullopt;
+//        }
+//        if (!std::holds_alternative<list>(value)) {
+//            throw IncorrectTypeException("list", type());
+//        }
+//        return std::get<list>(value);
+//    }
+//
+//    string toString() {
+//        if (!std::holds_alternative<string>(value)) {
+//            throw IncorrectTypeException("string", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<string>(value);
+//    }
+//
+//    float toFloat() {
+//        if (std::holds_alternative<int>(value)) {
+//            return static_cast<float>(std::get<int>(value));
+//        }
+//        if (std::holds_alternative<unsigned int>(value)) {
+//            return static_cast<float>(std::get<unsigned int>(value));
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<float>(value);
+//    }
+//
+//    int toInt() {
+//        if (!std::holds_alternative<int>(value)) {
+//            throw IncorrectTypeException("int", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<int>(value);
+//    }
+//
+//    unsigned int toUInt() {
+//        if (!std::holds_alternative<unsigned int>(value)) {
+//            throw IncorrectTypeException("unsigned int", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<unsigned int>(value);
+//    }
+//
+//    bool toBoolean() {
+//        if (!std::holds_alternative<bool>(value)) {
+//            throw IncorrectTypeException("bool", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<bool>(value);
+//    }
+//
+//    map toMap() {
+//        if (!std::holds_alternative<map>(value)) {
+//            throw IncorrectTypeException("map", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<map>(value);
+//    }
+//
+//    list toList() {
+//        if (!std::holds_alternative<list>(value)) {
+//            throw IncorrectTypeException("array", type());
+//        }
+//        if (isNull()) {
+//            throw NullPointerException("Value is Null");
+//        }
+//        return std::get<list>(value);
+//    }
+//
+//    bool isNull() {
+//        return std::holds_alternative<std::monostate>(value);
+//    }
 
     std::string type() const {
         return std::visit([](const auto& val) {
