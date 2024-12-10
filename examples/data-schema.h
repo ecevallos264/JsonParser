@@ -5,27 +5,31 @@
 #ifndef JSONPARSE_DATA_SCHEMA_H
 #define JSONPARSE_DATA_SCHEMA_H
 
-#include "../json-parser/schema_handler.h"
+#include "../json-parser/schema.h"
 #include "../json-parser/parsed-field.h"
 
 class InnerObject: public Schema {
 public:
-    int a;
+    int a1;
+    int a2;
     InnerObject() {
-        this->bind("a", &InnerObject::a);
+        this->bind("a1", &a1);
+        this->bind("a2", &a2);
     }
 };
 
 class DataSchema: public Schema {
 public:
-    float aaa;
+    double aaa;
     int dd;
-    InnerObject innerObject;
+    std::shared_ptr<InnerObject> nestedObject;
 public:
     DataSchema() {
-        this->bind("aaa", &DataSchema::aaa);
-        this->bind("dd", &DataSchema::dd);
-        this->bind("innerObject", &DataSchema::innerObject);
+        SchemaFactory::getInstance().registerType<InnerObject>("InnerObject");
+        this->bind("aaa", &aaa);
+        this->bind("dd", &dd);
+        this->bindObject<InnerObject>("object", "InnerObject");
+
     }
 };
 

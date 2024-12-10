@@ -62,10 +62,10 @@ private:
 
     void parseNumber() {
         unsigned int integerPart = 0;
-        float decimalPart = 0.0f;
+        double decimalPart = 0.0f;
         bool isNegative = false;
         bool hasPeriod = false;
-        float decimalMultiplier = 0.1;
+        double decimalMultiplier = 0.1;
 
         if (line[pos] == '-') {
             isNegative = true;
@@ -95,17 +95,17 @@ private:
             pos++;
         }
 
-        float finalNum = (isNegative ? -1.0f : 1.0f) * (integerPart + decimalPart);
+        double finalNum = (isNegative ? -1.0f : 1.0f) * (integerPart + decimalPart);
 
         if (pos < line.size() && line[pos] != ',' && line[pos] != '}' && line[pos] != ']' && !isspace(line[pos])) {
-            addToken(TOKEN_FLOAT, nullptr);
+            addToken(TOKEN_DECIMAL, nullptr);
             return;
         }
 
         if (!hasPeriod) {
             addToken(TOKEN_INTEGER, new int (finalNum));
         } else {
-            addToken(TOKEN_FLOAT, new float (finalNum));
+            addToken(TOKEN_DECIMAL, new double (finalNum));
         }
     }
 
@@ -129,8 +129,8 @@ public:
                     case TOKEN_BOOLEAN:
                         delete static_cast<bool *>(token.value);
                         break;
-                    case TOKEN_FLOAT:
-                        delete static_cast<float *>(token.value);
+                    case TOKEN_DECIMAL:
+                        delete static_cast<double *>(token.value);
                         break;
                     case TOKEN_INTEGER:
                         delete static_cast<int *>(token.value);
@@ -214,11 +214,11 @@ public:
                 case TOKEN_BOOLEAN:
                     std::cout << "TOKEN BOOLEAN["<< *static_cast<bool *>(token.value) <<"]" << std::endl;
                     break;
-                case TOKEN_FLOAT:
-                    std::cout << "TOKEN NUMBER["<< *static_cast<float *>(token.value) <<"]" << std::endl;
+                case TOKEN_DECIMAL:
+                    std::cout << "TOKEN NUMBER["<< *static_cast<double *>(token.value) <<"]" << std::endl;
                     break;
                 case TOKEN_INTEGER:
-                    std::cout << "TOKEN NUMBER["<< *static_cast<float *>(token.value) <<"]" << std::endl;
+                    std::cout << "TOKEN NUMBER["<< *static_cast<double *>(token.value) <<"]" << std::endl;
                     break;
                 case TOKEN_ARRAY:
                     std::cout << "TOKEN ARRAY" << std::endl;

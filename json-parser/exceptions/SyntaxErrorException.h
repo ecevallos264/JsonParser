@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <string>
-#include "../../../JsonParserLib/tokens.h"
+#include "../tokens.h"
 
 class SyntaxErrorException : public std::exception {
     std::string full_message;

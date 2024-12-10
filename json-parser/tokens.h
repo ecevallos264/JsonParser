@@ -3,7 +3,7 @@
 
 enum Token {
     TOKEN_STRING,
-    TOKEN_FLOAT,
+    TOKEN_DECIMAL,
     TOKEN_INTEGER,
     TOKEN_UNSIGNED_INTEGER,
     TOKEN_ARRAY,
@@ -22,7 +22,7 @@ std::string getTokenName(Token token) {
     switch (token) {
         case TOKEN_STRING: return "TOKEN_STRING";
 //        case TOKEN_NUMBER: return "TOKEN_NUMBER";
-        case TOKEN_FLOAT: return "TOKEN_FLOAT";
+        case TOKEN_DECIMAL: return "TOKEN_DECIMAL";
         case TOKEN_INTEGER: return "TOKEN_INTEGER";
         case TOKEN_UNSIGNED_INTEGER: return "TOKEN_UNSIGNED_INTEGER";
         case TOKEN_ARRAY: return "TOKEN_ARRAY";
